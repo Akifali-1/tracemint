@@ -77,7 +77,7 @@ export default function Footer({ setCurrentPage, onOpenDemo }) {
             </ul>
           </div>
 
-          {/* Connect / CTA */}
+          {/* Connect / Contact */}
           <div>
             <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider font-mono mb-3">
               Developer Network
@@ -91,6 +91,16 @@ export default function Footer({ setCurrentPage, onOpenDemo }) {
             >
               Claim your handle →
             </button>
+            
+            <div className="pt-4 space-y-1.5 text-xs font-mono">
+              <div className="text-slate-500">
+                Web: <a href="https://tracemint.tech" className="text-slate-800 hover:text-slate-950 font-semibold underline underline-offset-2">tracemint.tech</a>
+              </div>
+              <div className="text-slate-500">
+                Contact: <a href="mailto:contact@tracemint.tech" className="text-sky-700 hover:text-sky-900 underline underline-offset-2">contact@tracemint.tech</a>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 mt-4 text-slate-400">
               <a href="https://github.com/Akifali-1/tracemint" target="_blank" rel="noreferrer" className="hover:text-slate-900 transition-colors">
                 <GithubIcon className="w-4 h-4" />
@@ -103,7 +113,7 @@ export default function Footer({ setCurrentPage, onOpenDemo }) {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-mono">
           <div>
-            © {new Date().getFullYear()} TraceMint Inc. Built for developers who ship.
+            © 2026 TraceMint. Built for developers who ship.
           </div>
           <div className="flex items-center gap-4">
             <span className="hover:text-slate-600 cursor-pointer">Security Audits</span>

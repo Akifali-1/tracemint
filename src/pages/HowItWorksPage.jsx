@@ -67,9 +67,9 @@ export default function HowItWorksPage({ onOpenDemo }) {
       num: 3,
       title: "Share your proof",
       shortDesc: "A permanent, tamper-resistant developer dossier for founders, recruiters, and peers.",
-      fullDesc: "Instead of sending stale PDFs or unvetted LinkedIn profiles, share your clean tracemint.dev link. Recruiter-friendly executive summaries sit alongside deep technical proofs for engineering managers.",
+      fullDesc: "Instead of sending stale PDFs or unvetted LinkedIn profiles, share your clean tracemint.tech link. Recruiter-friendly executive summaries sit alongside deep technical proofs for engineering managers.",
       items: [
-        "Permanent customizable URL: tracemint.dev/yourhandle",
+        "Permanent customizable URL: tracemint.tech/yourhandle",
         "Interactive proof cards embeddable in GitHub READMEs",
         "Recruiter audit view with one-click verification badges",
         "Exportable verifiable JSON credential for Web3 & DAO grants"
@@ -79,7 +79,7 @@ export default function HowItWorksPage({ onOpenDemo }) {
         output: [
           "🚀 Generating cryptographic certificate...",
           "✔ Hash: 0x9c3f84e1b82a0d927163efc81467",
-          "✔ Live at: https://tracemint.dev/alexrivera.mint",
+          "✔ Live at: https://tracemint.tech/alexrivera.mint",
           "✔ Embed badge copied to clipboard: [![TraceMint Proof]...]",
           "✔ Profile ready to share with teams."
         ]

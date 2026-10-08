@@ -326,7 +326,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
                 <td className="py-3.5 px-4 sm:px-6 font-medium text-slate-900">Recruiter / Client Share Link</td>
                 <td className="py-3.5 px-4 text-slate-500">Static PDF attachment</td>
                 <td className="py-3.5 px-4 text-slate-500">Messy repository list</td>
-                <td className="py-3.5 px-4 sm:px-6 font-semibold text-emerald-700 bg-sky-50/20">tracemint.dev/yourhandle</td>
+                <td className="py-3.5 px-4 sm:px-6 font-semibold text-emerald-700 bg-sky-50/20">tracemint.tech/yourhandle</td>
               </tr>
             </tbody>
           </table>
@@ -352,14 +352,14 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
           <form onSubmit={handleClaim} className="max-w-md mx-auto flex flex-col sm:flex-row gap-2 pt-2">
             <div className="relative flex-1">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-xs text-slate-500">
-                tracemint.dev/
+                tracemint.tech/
               </span>
               <input
                 type="text"
                 placeholder="yourhandle"
                 value={handleInput}
                 onChange={(e) => setHandleInput(e.target.value)}
-                className="w-full pl-28 pr-3 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full pl-32 pr-3 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>
             <button

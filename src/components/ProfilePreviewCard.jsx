@@ -23,7 +23,7 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
   const profile = sampleProfiles[profileIndex] || sampleProfiles[0];
 
   const handleCopyLink = () => {
-    navigator.clipboard?.writeText?.(`https://tracemint.dev/${profile.handle}`);
+    navigator.clipboard?.writeText?.(`https://tracemint.tech/${profile.handle}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -35,7 +35,7 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
         <div className="flex items-center gap-2 font-mono">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-slate-300">tracemint.dev/</span>
+            <span className="text-slate-300">tracemint.tech/</span>
             <span className="text-cyan-400 font-semibold">{profile.handle}</span>
           </div>
           <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] border border-slate-700">
