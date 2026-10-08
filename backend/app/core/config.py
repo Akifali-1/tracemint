@@ -35,15 +35,38 @@ class Settings(BaseSettings):
     )
 
     @property
+    def effective_frontend_url(self) -> str:
+        """
+        Determines the default frontend base URL.
+        If FRONTEND_URL is explicitly configured to a custom domain, use it.
+        If running in cloud/production or on Render, fallback to https://tracemint.tech.
+        Otherwise defaults to http://localhost:5173.
+        """
+        configured = (self.FRONTEND_URL or "").rstrip("/")
+        if configured and "localhost" not in configured and "127.0.0.1" not in configured:
+            return configured
+        if os.getenv("RENDER") or self.is_production or "onrender.com" in self.BACKEND_URL:
+            return "https://tracemint.tech"
+        return configured or "http://localhost:5173"
+
+    @property
     def cors_origin_list(self) -> List[str]:
-        origins = [orig.strip() for orig in self.CORS_ORIGINS.split(",") if orig.strip()]
-        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
-            origins.append(self.FRONTEND_URL.rstrip("/"))
+        origins = [orig.strip().rstrip("/") for orig in self.CORS_ORIGINS.split(",") if orig.strip()]
+        defaults = [
+            "https://tracemint.tech",
+            "https://www.tracemint.tech",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            self.effective_frontend_url.rstrip("/")
+        ]
+        for d in defaults:
+            if d and d not in origins:
+                origins.append(d)
         return origins
 
     @property
     def is_production(self) -> bool:
-        return self.APP_ENV.lower() in ("production", "prod")
+        return self.APP_ENV.lower() in ("production", "prod") or bool(os.getenv("RENDER"))
 
 
 settings = Settings()

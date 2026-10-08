@@ -40,8 +40,16 @@ async function request(endpoint, options = {}) {
 
 export const api = {
   // URLs for OAuth redirects
-  getGoogleLoginUrl: () => `${API_BASE}/api/auth/google/login`,
-  getGitHubConnectUrl: () => `${API_BASE}/api/github/connect`,
+  getGoogleLoginUrl: () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const query = origin ? `?redirect_url=${encodeURIComponent(origin)}` : '';
+    return `${API_BASE}/api/auth/google/login${query}`;
+  },
+  getGitHubConnectUrl: () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const query = origin ? `?redirect_url=${encodeURIComponent(origin)}` : '';
+    return `${API_BASE}/api/github/connect${query}`;
+  },
 
   // Authentication
   getMe: async () => {

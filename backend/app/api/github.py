@@ -28,6 +28,7 @@ router = APIRouter(prefix="/github", tags=["GitHub"])
 @router.get("/connect", summary="Initiate GitHub OAuth connection")
 async def github_connect(
     request: Request,
+    redirect_url: Optional[str] = None,
     user: Optional[User] = Depends(get_optional_user)
 ):
     """
@@ -55,6 +56,30 @@ async def github_connect(
             samesite="lax",
             max_age=600
         )
+
+    # Determine caller's intended frontend origin
+    target_origin = None
+    candidate = redirect_url or request.headers.get("referer") or request.headers.get("origin")
+    if candidate:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(candidate)
+            candidate_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip('/')
+            allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+            if candidate_origin in allowed:
+                target_origin = candidate_origin
+        except Exception:
+            pass
+
+    if target_origin:
+        redirect.set_cookie(
+            key="oauth_frontend_origin_github",
+            value=target_origin,
+            httponly=True,
+            secure=settings.is_production,
+            samesite="lax",
+            max_age=600
+        )
     return redirect
 
 
@@ -70,16 +95,28 @@ async def github_callback(
     Handles GitHub OAuth authorization response, obtains access token,
     encrypts it at rest, and links the GitHub account to the active TraceMint user.
     """
-    frontend_base = settings.FRONTEND_URL.rstrip('/')
+    stored_frontend = request.cookies.get("oauth_frontend_origin_github")
+    frontend_base = settings.effective_frontend_url.rstrip('/')
+    if stored_frontend:
+        allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+        if stored_frontend in allowed:
+            frontend_base = stored_frontend
+
+    def _cleanup_redirect(url: str, status_code: int = status.HTTP_302_FOUND) -> RedirectResponse:
+        r = RedirectResponse(url=url, status_code=status_code)
+        r.delete_cookie("oauth_frontend_origin_github")
+        r.delete_cookie("oauth_state_github")
+        r.delete_cookie("oauth_connect_user_id")
+        return r
 
     if error or not code:
         logger.warning(f"GitHub OAuth callback received error: {error}")
-        return RedirectResponse(f"{frontend_base}/?error=github_oauth_denied")
+        return _cleanup_redirect(f"{frontend_base}/?error=github_oauth_denied")
 
     stored_state = request.cookies.get("oauth_state_github")
     if not stored_state or stored_state != state:
         logger.warning("GitHub OAuth state mismatch or expired")
-        return RedirectResponse(f"{frontend_base}/?error=invalid_oauth_state")
+        return _cleanup_redirect(f"{frontend_base}/?error=invalid_oauth_state")
 
     # Determine user to connect to
     user_id_str = request.cookies.get("oauth_connect_user_id")
@@ -149,6 +186,7 @@ async def github_callback(
     )
     redirect.delete_cookie("oauth_state_github")
     redirect.delete_cookie("oauth_connect_user_id")
+    redirect.delete_cookie("oauth_frontend_origin_github")
     logger.info(f"User {current_user.id} successfully connected GitHub account @{gh_profile['username']}")
     return redirect
 

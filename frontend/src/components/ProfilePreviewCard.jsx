@@ -12,12 +12,10 @@ import {
   Star,
   Copy,
   Check,
-  Code2,
-  Sparkles
+  Code2
 } from 'lucide-react';
 import UserAvatar from './UserAvatar';
 import GitHubContributionGraph from './GitHubContributionGraph';
-import ProfileImprovementSection from './ProfileImprovementSection';
 import { sampleProfiles, mockHeatmapWeeks } from '../data/mockData';
 
 export default function ProfilePreviewCard({ profileIndex = 0, realProfile = null }) {
@@ -193,19 +191,6 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
         >
           Overview & Skills
         </button>
-        <button
-          onClick={() => setActiveTab('improvements')}
-          className={`py-3 px-3 border-b-2 font-medium transition-colors whitespace-nowrap ${
-            activeTab === 'improvements'
-              ? 'border-slate-900 text-slate-900 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
-            <span>Profile Improvement</span>
-          </span>
-        </button>
         {isReal ? (
           <>
             <button
@@ -333,24 +318,6 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
                 totalContributions={isReal ? null : 298}
               />
             </div>
-
-            {/* Profile Improvement Section */}
-            <div className="pt-5 border-t border-slate-200">
-              <ProfileImprovementSection 
-                improvements={improvements}
-                metrics={metrics || {}}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Dedicated Profile Improvement Tab */}
-        {activeTab === 'improvements' && (
-          <div className="space-y-4">
-            <ProfileImprovementSection 
-              improvements={improvements}
-              metrics={metrics || {}}
-            />
           </div>
         )}
 

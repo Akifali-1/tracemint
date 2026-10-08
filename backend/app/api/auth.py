@@ -19,7 +19,11 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.get("/google/login", summary="Initiate Google OAuth login")
-async def google_login(response: Response):
+async def google_login(
+    request: Request,
+    response: Response,
+    redirect_url: Optional[str] = None
+):
     """Redirects user to Google OAuth 2.0 authorization endpoint with CSRF state protection."""
     state = secrets.token_urlsafe(32)
     auth_url = get_google_auth_url(state)
@@ -34,6 +38,30 @@ async def google_login(response: Response):
         samesite="lax",
         max_age=600  # 10 minutes
     )
+
+    # Determine caller's intended frontend origin
+    target_origin = None
+    candidate = redirect_url or request.headers.get("referer") or request.headers.get("origin")
+    if candidate:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(candidate)
+            candidate_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip('/')
+            allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+            if candidate_origin in allowed:
+                target_origin = candidate_origin
+        except Exception:
+            pass
+
+    if target_origin:
+        redirect.set_cookie(
+            key="oauth_frontend_origin",
+            value=target_origin,
+            httponly=True,
+            secure=settings.is_production,
+            samesite="lax",
+            max_age=600
+        )
     return redirect
 
 
@@ -46,22 +74,33 @@ async def google_callback(
     db: AsyncSession = Depends(get_db)
 ):
     """Handles Google OAuth authorization response, creates or updates user, and establishes session."""
-    frontend_base = settings.FRONTEND_URL.rstrip('/')
+    stored_frontend = request.cookies.get("oauth_frontend_origin")
+    frontend_base = settings.effective_frontend_url.rstrip('/')
+    if stored_frontend:
+        allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+        if stored_frontend in allowed:
+            frontend_base = stored_frontend
+
+    def _cleanup_redirect(url: str, status_code: int = status.HTTP_302_FOUND) -> RedirectResponse:
+        r = RedirectResponse(url=url, status_code=status_code)
+        r.delete_cookie("oauth_frontend_origin")
+        r.delete_cookie("oauth_state_google")
+        return r
 
     if error or not code:
         logger.warning(f"Google OAuth callback received error: {error}")
-        return RedirectResponse(f"{frontend_base}/?error=google_oauth_denied")
+        return _cleanup_redirect(f"{frontend_base}/?error=google_oauth_denied")
 
     # Validate state
     stored_state = request.cookies.get("oauth_state_google")
     if not stored_state or stored_state != state:
         logger.warning("Google OAuth state mismatch or expired")
-        return RedirectResponse(f"{frontend_base}/?error=invalid_oauth_state")
+        return _cleanup_redirect(f"{frontend_base}/?error=invalid_oauth_state")
 
     # Exchange code for user identity
     profile = await exchange_google_code(code)
     if not profile:
-        return RedirectResponse(f"{frontend_base}/?error=google_exchange_failed")
+        return _cleanup_redirect(f"{frontend_base}/?error=google_exchange_failed")
 
     # Find or create User
     stmt = select(User).where(User.google_id == profile["google_id"]).options(selectinload(User.github_account))
@@ -103,7 +142,8 @@ async def google_callback(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     redirect.delete_cookie("oauth_state_google")
-    logger.info(f"User {user.id} logged in successfully via Google")
+    redirect.delete_cookie("oauth_frontend_origin")
+    logger.info(f"User {user.id} logged in successfully via Google, returning to {frontend_base}")
     return redirect
 
 
