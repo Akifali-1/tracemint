@@ -21,7 +21,8 @@ def get_google_auth_url(state: str) -> str:
         "access_type": "online",
         "prompt": "select_account"
     }
-    encoded = "&".join(f"{k}={httpx.URL('', params={k: v}).query.decode()}" for k, v in params.items())
+    import urllib.parse
+    encoded = urllib.parse.urlencode(params)
     return f"{GOOGLE_AUTH_URL}?{encoded}"
 
 

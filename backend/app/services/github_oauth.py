@@ -17,7 +17,8 @@ def get_github_auth_url(state: str) -> str:
         "state": state,
         "allow_signup": "true"
     }
-    encoded = "&".join(f"{k}={httpx.URL('', params={k: v}).query.decode()}" for k, v in params.items())
+    import urllib.parse
+    encoded = urllib.parse.urlencode(params)
     return f"{GITHUB_AUTH_URL}?{encoded}"
 
 
