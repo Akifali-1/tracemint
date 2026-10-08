@@ -12,6 +12,7 @@ from app.core.security import decrypt_token
 from app.services.github_client import GitHubClient
 from app.services.github_analyzer import GitHubAnalyzer
 from app.services.gemini_client import GeminiClient
+from app.services.rate_limiter import GeminiRateLimiter
 from app.schemas.profile import DeveloperProfileOut, PublicProfileOut
 from app.core.logging import logger
 
@@ -132,6 +133,7 @@ class ProfileService:
                     projects=profile.projects_json,
                     insights=profile.insights_json,
                     metrics=profile.metrics_json,
+                    improvements=profile.improvements_json or [],
                     is_public=profile.is_public,
                     created_at=profile.created_at,
                     updated_at=profile.updated_at
@@ -163,9 +165,14 @@ class ProfileService:
         # 3. Deterministic evidence
         evidence = GitHubAnalyzer.analyze_repositories(github_account.username, repo_dicts)
 
-        # 4. Gemini AI interpretation
+        # 4. Gemini AI interpretation (Enforce server-side 24h limit BEFORE calling Gemini)
+        await GeminiRateLimiter.check_rate_limit(db, user.id)
+
         gemini = GeminiClient()
         analysis = await gemini.analyze_evidence(evidence)
+
+        # Track usage in PostgreSQL by authenticated user_id
+        await GeminiRateLimiter.record_usage(db, user.id, feature="profile_analysis")
 
         # 5. Build metrics payload
         metrics_payload = {
@@ -178,6 +185,8 @@ class ProfileService:
             "calculated_at": metrics.calculated_at.isoformat()
         }
 
+        improvements_payload = [i.model_dump() for i in analysis.improvements]
+
         # 6. Upsert DeveloperProfile
         username_slug = github_account.username.lower()
 
@@ -188,6 +197,7 @@ class ProfileService:
             profile.projects_json = [p.model_dump() for p in analysis.notable_projects]
             profile.insights_json = analysis.insights
             profile.metrics_json = metrics_payload
+            profile.improvements_json = improvements_payload
             profile.updated_at = datetime.now(timezone.utc)
         else:
             profile = DeveloperProfile(
@@ -199,6 +209,7 @@ class ProfileService:
                 projects_json=[p.model_dump() for p in analysis.notable_projects],
                 insights_json=analysis.insights,
                 metrics_json=metrics_payload,
+                improvements_json=improvements_payload,
                 is_public=True,
                 created_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc)
@@ -216,6 +227,7 @@ class ProfileService:
             projects=profile.projects_json,
             insights=profile.insights_json,
             metrics=profile.metrics_json,
+            improvements=profile.improvements_json or [],
             is_public=profile.is_public,
             created_at=profile.created_at,
             updated_at=profile.updated_at
@@ -251,6 +263,7 @@ class ProfileService:
             projects=profile.projects_json,
             insights=profile.insights_json,
             metrics=profile.metrics_json,
+            improvements=profile.improvements_json or [],
             updated_at=profile.updated_at,
             is_demo=False
         )

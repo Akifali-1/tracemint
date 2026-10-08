@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.1-flash-lite"
+    GEMINI_REQUESTS_PER_USER_PER_DAY: int = 10
 
     SESSION_SECRET: str = "dev-secret-key-tracemint-secure-session-change-in-prod-2026"
     TOKEN_ENCRYPTION_KEY: str = ""

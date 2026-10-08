@@ -22,6 +22,7 @@ class DeveloperProfile(Base):
     projects_json: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
     insights_json: Mapped[List[str]] = mapped_column(JSON, default=list, nullable=False)
     metrics_json: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    improvements_json: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, default=list, nullable=True)
     
     is_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     

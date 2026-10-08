@@ -15,6 +15,9 @@ import {
   Code2,
   Sparkles
 } from 'lucide-react';
+import UserAvatar from './UserAvatar';
+import GitHubContributionGraph from './GitHubContributionGraph';
+import ProfileImprovementSection from './ProfileImprovementSection';
 import { sampleProfiles, mockHeatmapWeeks } from '../data/mockData';
 
 export default function ProfilePreviewCard({ profileIndex = 0, realProfile = null }) {
@@ -47,6 +50,7 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
   const strengths = isReal ? (realProfile.strengths || []) : [];
   const notableProjects = isReal ? (realProfile.projects || []) : [];
   const insights = isReal ? (realProfile.insights || []) : [];
+  const improvements = isReal ? (realProfile.improvements || []) : [];
 
   const handleCopyLink = () => {
     navigator.clipboard?.writeText?.(`https://tracemint.tech/@${handle}`);
@@ -90,10 +94,11 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5">
           <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
             <div className="relative shrink-0">
-              <img 
+              <UserAvatar 
                 src={avatar} 
-                alt={name} 
-                className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-slate-200"
+                name={name} 
+                githubUsername={handle}
+                className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl"
               />
               <div className="absolute -bottom-1 -right-1 bg-sky-600 text-white p-0.5 sm:p-1 rounded-full shadow" title="Verified by TraceMint Engine">
                 <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -187,6 +192,19 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
           }`}
         >
           Overview & Skills
+        </button>
+        <button
+          onClick={() => setActiveTab('improvements')}
+          className={`py-3 px-3 border-b-2 font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'improvements'
+              ? 'border-slate-900 text-slate-900 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+            <span>Profile Improvement</span>
+          </span>
         </button>
         {isReal ? (
           <>
@@ -308,20 +326,31 @@ export default function ProfilePreviewCard({ profileIndex = 0, realProfile = nul
               </div>
             </div>
 
-            {/* If sample, display mock timeline */}
-            {!isReal && (
-              <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80">
-                <div className="flex items-center justify-between mb-3 text-xs">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-900">
-                    <Flame className="w-4 h-4 text-amber-500" />
-                    <span>Sample Contribution Timeline</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-slate-500 font-mono">
-                  Sample visualization illustrating how developer timeline activity is synthesized.
-                </div>
-              </div>
-            )}
+            {/* GitHub Commit / Contributions Calendar Heatmap */}
+            <div className="pt-5 border-t border-slate-200">
+              <GitHubContributionGraph 
+                username={handle}
+                totalContributions={isReal ? null : 298}
+              />
+            </div>
+
+            {/* Profile Improvement Section */}
+            <div className="pt-5 border-t border-slate-200">
+              <ProfileImprovementSection 
+                improvements={improvements}
+                metrics={metrics || {}}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Profile Improvement Tab */}
+        {activeTab === 'improvements' && (
+          <div className="space-y-4">
+            <ProfileImprovementSection 
+              improvements={improvements}
+              metrics={metrics || {}}
+            />
           </div>
         )}
 

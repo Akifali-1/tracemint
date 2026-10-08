@@ -1,5 +1,7 @@
 import secrets
-from typing import Optional
+import re
+from typing import Optional, Dict, Any
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, delete
@@ -243,7 +245,42 @@ async def disconnect_github(
 
     # Delete GitHub account (cascading deletes repositories & metrics)
     await db.delete(account)
-    await db.commit()
-
     logger.info(f"User {user.id} disconnected GitHub account @{account.username}")
     return {"status": "success", "message": "GitHub account disconnected and credentials safely removed."}
+
+
+@router.get("/contributions/{username}", summary="Fetch authentic GitHub contribution matrix and count")
+async def get_github_contributions(username: str):
+    """
+    Scrapes the public GitHub contribution matrix for the given username,
+    returning the exact verified total and daily activity levels.
+    """
+    clean_user = username.strip().lstrip("@")
+    url = f"https://github.com/users/{clean_user}/contributions"
+    headers = {"User-Agent": "Mozilla/5.0 (TraceMint-Engine/1.0)"}
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code != 200:
+                logger.warning(f"GitHub contributions returned {resp.status_code} for {clean_user}")
+                return {"username": clean_user, "total": 0, "cells": []}
+            text = resp.text
+
+        match = re.search(r"(\d[\d,]*)\s+contributions", text, re.IGNORECASE)
+        total = int(match.group(1).replace(",", "")) if match else 0
+
+        pattern = re.compile(r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d+)"')
+        matches = pattern.findall(text)
+        if not matches:
+            pattern2 = re.compile(r'data-level="(\d+)"[^>]*data-date="(\d{4}-\d{2}-\d{2})"')
+            matches = [(d, l) for l, d in pattern2.findall(text)]
+
+        cells = [{"date": d, "level": int(l), "score": int(l)} for d, l in matches]
+        return {
+            "username": clean_user,
+            "total": total,
+            "cells": cells
+        }
+    except Exception as exc:
+        logger.error(f"Failed to fetch contributions for {clean_user}: {exc}")
+        return {"username": clean_user, "total": 0, "cells": []}

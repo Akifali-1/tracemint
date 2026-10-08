@@ -115,6 +115,9 @@ async def get_current_user_profile(user: Optional[User] = Depends(get_optional_u
 
     github_connected = user.github_account is not None
     github_user = user.github_account.username if github_connected else None
+    github_avatar = user.github_account.avatar_url if github_connected else None
+    # Prefer GitHub avatar for developers, fallback to Google avatar
+    effective_avatar = github_avatar or (f"https://github.com/{github_user}.png" if github_user else user.avatar_url)
 
     return AuthMeResponse(
         authenticated=True,
@@ -122,10 +125,11 @@ async def get_current_user_profile(user: Optional[User] = Depends(get_optional_u
             id=user.id,
             email=user.email,
             name=user.name,
-            avatar_url=user.avatar_url,
+            avatar_url=effective_avatar,
             created_at=user.created_at,
             has_github=github_connected,
-            github_username=github_user
+            github_username=github_user,
+            github_avatar_url=github_avatar
         )
     )
 

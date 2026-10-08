@@ -4,6 +4,7 @@ from app.models.github_account import GitHubAccount
 from app.models.repository import Repository
 from app.models.github_metrics import GitHubMetrics
 from app.models.developer_profile import DeveloperProfile
+from app.models.gemini_usage import GeminiUsageLog
 
 __all__ = [
     "Base",
@@ -11,5 +12,6 @@ __all__ = [
     "GitHubAccount",
     "Repository",
     "GitHubMetrics",
-    "DeveloperProfile"
+    "DeveloperProfile",
+    "GeminiUsageLog"
 ]

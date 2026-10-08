@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Menu, X, ArrowUpRight, Terminal } from 'lucide-react';
+import UserAvatar from './UserAvatar';
 
 export default function Navbar({ 
   currentPage, 
@@ -86,13 +87,12 @@ export default function Navbar({
                   onClick={onOpenMyProfile}
                   className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-900 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition-all"
                 >
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-bold">
-                      {user.name?.[0] || 'U'}
-                    </span>
-                  )}
+                  <UserAvatar 
+                    src={user.avatar_url} 
+                    name={user.name} 
+                    githubUsername={user.github_username}
+                    className="w-5 h-5 rounded-full"
+                  />
                   <span>{user.name?.split(' ')[0] || 'Profile'}</span>
                 </button>
                 <button

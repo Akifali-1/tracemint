@@ -66,6 +66,11 @@ export const api = {
     return request('/api/github/disconnect', { method: 'POST' });
   },
 
+  getContributions: async (username) => {
+    const clean = username.replace(/^@/, '');
+    return request(`/api/github/contributions/${clean}`);
+  },
+
   // Developer Profile
   generateProfile: async (forceRefresh = false) => {
     return request('/api/profile/generate', {
@@ -76,6 +81,10 @@ export const api = {
 
   getMyProfile: async () => {
     return request('/api/profile/me');
+  },
+
+  getAiUsage: async () => {
+    return request('/api/profile/ai-usage');
   },
 
   getPublicProfile: async (username) => {

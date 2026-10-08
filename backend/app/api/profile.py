@@ -34,6 +34,8 @@ async def generate_profile(
     try:
         profile = await ProfileService.generate_or_get_profile(db, user, force_refresh=force_refresh)
         return profile
+    except HTTPException:
+        raise
     except ValueError as ve:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,6 +47,24 @@ async def generate_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to generate developer profile. Please check logs or try again."
         )
+
+
+@router.get("/ai-usage", summary="Get authenticated user's 24-hour Gemini AI allowance")
+async def get_ai_usage(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Returns today's Gemini usage count and remaining allowance for the user."""
+    from app.services.rate_limiter import GeminiRateLimiter
+    from app.core.config import settings
+
+    used = await GeminiRateLimiter.get_usage_count_last_24h(db, user.id)
+    limit = settings.GEMINI_REQUESTS_PER_USER_PER_DAY
+    return {
+        "used": used,
+        "limit": limit,
+        "remaining": max(0, limit - used)
+    }
 
 
 @router.get("/me", response_model=DeveloperProfileOut, summary="Get current user's developer profile")
@@ -71,6 +91,7 @@ async def get_my_profile(
         projects=profile.projects_json,
         insights=profile.insights_json,
         metrics=profile.metrics_json,
+        improvements=profile.improvements_json or [],
         is_public=profile.is_public,
         created_at=profile.created_at,
         updated_at=profile.updated_at

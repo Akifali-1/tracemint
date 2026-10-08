@@ -12,6 +12,9 @@ import {
   Copy, 
   Check, 
   AlertCircle, 
+  AlertTriangle,
+  Clock,
+  X,
   Loader2, 
   ArrowRight,
   Flame,
@@ -21,6 +24,9 @@ import {
   GitBranch
 } from 'lucide-react';
 import { GithubIcon } from '../components/Icons';
+import UserAvatar from '../components/UserAvatar';
+import GitHubContributionGraph from '../components/GitHubContributionGraph';
+import ProfileImprovementSection from '../components/ProfileImprovementSection';
 import { api } from '../services/api';
 
 export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
@@ -29,7 +35,8 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshStep, setRefreshStep] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null); // { message, status, isRateLimit }
+  const [aiUsage, setAiUsage] = useState(null);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'projects' | 'languages' | 'evidence'
 
@@ -39,9 +46,12 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
 
   const loadProfileData = async () => {
     setLoading(true);
-    setError('');
+    setError(null);
     try {
       if (user?.has_github) {
+        // Fetch AI quota
+        api.getAiUsage().then(setAiUsage).catch(() => {});
+
         const prof = await api.getMyProfile().catch(() => null);
         if (prof) {
           setProfile(prof);
@@ -55,7 +65,12 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
         api.getEvidence().then(setEvidence).catch(() => {});
       }
     } catch (err) {
-      setError(err.message || 'Failed to load profile data.');
+      const isRateLimit = err?.status === 429 || (typeof err?.message === 'string' && (err.message.includes('limit') || err.message.includes('tomorrow')));
+      setError({
+        message: err.message || 'Failed to load profile data.',
+        status: err?.status,
+        isRateLimit
+      });
     } finally {
       setLoading(false);
     }
@@ -63,7 +78,7 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
 
   const handleGenerateProfile = async (forceRefresh = true) => {
     setRefreshing(true);
-    setError('');
+    setError(null);
     setRefreshStep('Syncing latest public repositories from GitHub...');
     try {
       await new Promise(r => setTimeout(r, 600));
@@ -75,11 +90,18 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
       setProfile(newProf);
       setRefreshStep('');
 
-      // Refresh raw evidence
+      // Refresh raw evidence and AI quota
       api.getEvidence().then(setEvidence).catch(() => {});
+      api.getAiUsage().then(setAiUsage).catch(() => {});
       if (onUserUpdated) onUserUpdated();
     } catch (err) {
-      setError(err.message || 'Profile generation failed. Please try again.');
+      const isRateLimit = err?.status === 429 || (typeof err?.message === 'string' && (err.message.includes('limit') || err.message.includes('tomorrow')));
+      setError({
+        message: err.message || 'Profile generation failed. Please try again.',
+        status: err?.status,
+        isRateLimit
+      });
+      api.getAiUsage().then(setAiUsage).catch(() => {});
     } finally {
       setRefreshing(false);
     }
@@ -156,6 +178,7 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
   const strengths = profile?.strengths || [];
   const projects = profile?.projects || [];
   const insights = profile?.insights || [];
+  const improvements = profile?.improvements || [];
   const languages = metrics?.languages || {};
 
   return (
@@ -163,9 +186,55 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
       
       {/* Notice/Error Banner */}
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-          <span>{error}</span>
+        <div 
+          className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+            error.isRateLimit 
+              ? 'bg-amber-50/90 border-amber-300 text-amber-950 shadow-sm' 
+              : 'bg-rose-50/90 border-rose-300 text-rose-950 shadow-sm'
+          }`}
+          role="alert"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
+                error.isRateLimit ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+              }`}>
+                {error.isRateLimit ? <Clock className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold tracking-tight">
+                    {error.isRateLimit ? "You've reached today's AI analysis limit." : "Action Failed"}
+                  </h4>
+                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold border ${
+                    error.isRateLimit 
+                      ? 'bg-amber-100/80 text-amber-800 border-amber-300' 
+                      : 'bg-rose-100/80 text-rose-800 border-rose-300'
+                  }`}>
+                    {error.isRateLimit ? '429 Rate Limit' : 'Error'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  {error.isRateLimit 
+                    ? "You've reached today's AI analysis limit. Try again tomorrow. TraceMint enforces a server-side limit of 10 Gemini analyses per user every 24 hours during testing."
+                    : (error.message || 'An unexpected error occurred. Please try again.')}
+                </p>
+                {error.isRateLimit && (
+                  <div className="pt-1 flex items-center gap-3 text-[11px] font-mono text-amber-900/80">
+                    <span>• Testing Safeguard: 10 calls / 24h</span>
+                    <span>• Auto-resets on a rolling 24h window</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100/60 transition-colors shrink-0"
+              title="Dismiss notification"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -190,6 +259,19 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
             <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] border border-slate-700">
               PROVEN BUILDER
             </span>
+            {aiUsage && (
+              <span 
+                className={`px-2 py-0.5 rounded text-[10px] border flex items-center gap-1 ${
+                  aiUsage.remaining === 0 
+                    ? 'bg-amber-950/80 text-amber-300 border-amber-700' 
+                    : 'bg-slate-800 text-slate-300 border-slate-700'
+                }`}
+                title="Gemini AI Analysis Limit (24h rolling)"
+              >
+                <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                AI: {aiUsage.used}/{aiUsage.limit}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -219,10 +301,11 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
             {/* Identity Info */}
             <div className="flex items-start sm:items-center gap-4 sm:gap-6">
               <div className="relative shrink-0">
-                <img 
-                  src={user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'} 
-                  alt={user.name} 
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-slate-200"
+                <UserAvatar 
+                  src={user.avatar_url} 
+                  name={user.name} 
+                  githubUsername={user.github_username}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl"
                 />
                 <div className="absolute -bottom-1 -right-1 bg-sky-600 text-white p-1 rounded-full shadow" title="Verified by TraceMint Engine">
                   <ShieldCheck className="w-4 h-4" />
@@ -313,6 +396,14 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
               </div>
             </div>
           </div>
+
+          {/* GitHub Commit / Contributions Calendar */}
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <GitHubContributionGraph 
+              username={user.github_username || profile?.username_slug}
+              totalContributions={null}
+            />
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -326,6 +417,19 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
             }`}
           >
             Overview & Skills ({skills.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('improvements')}
+            className={`py-3 px-4 border-b-2 font-semibold transition-all whitespace-nowrap ${
+              activeTab === 'improvements'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+              <span>Profile Improvement</span>
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
@@ -447,6 +551,24 @@ export default function DashboardPage({ user, onUserUpdated, onNavigateHome }) {
                   })}
                 </div>
               </div>
+
+              {/* PROFILE IMPROVEMENT SECTION */}
+              <div className="pt-6 border-t border-slate-200">
+                <ProfileImprovementSection 
+                  improvements={improvements}
+                  metrics={metrics}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB: PROFILE IMPROVEMENT DEDICATED VIEW */}
+          {activeTab === 'improvements' && (
+            <div className="space-y-6">
+              <ProfileImprovementSection 
+                improvements={improvements}
+                metrics={metrics}
+              />
             </div>
           )}
 

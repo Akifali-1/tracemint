@@ -14,6 +14,7 @@ class UserOut(UserBase):
     created_at: datetime
     has_github: bool = False
     github_username: Optional[str] = None
+    github_avatar_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

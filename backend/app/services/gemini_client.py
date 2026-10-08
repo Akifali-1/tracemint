@@ -4,7 +4,14 @@ from typing import Dict, Any, Optional
 import httpx
 from app.core.config import settings
 from app.core.logging import logger
-from app.schemas.analysis import DeterministicEvidence, GeminiAnalysisResult, SkillEvidence, StrengthEvidence, NotableProject
+from app.schemas.analysis import (
+    DeterministicEvidence, 
+    GeminiAnalysisResult, 
+    SkillEvidence, 
+    StrengthEvidence, 
+    NotableProject,
+    ImprovementRecommendation
+)
 
 GEMINI_API_URL_TEMPLATE = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
@@ -28,6 +35,12 @@ STRICT RULES:
 13. Do not infer sensitive personal attributes.
 14. Do not infer age, gender, ethnicity, religion, health, political beliefs, or other sensitive characteristics.
 15. Return only valid, parseable JSON matching the requested schema without markdown backticks or commentary.
+16. Generate 3 to 5 actionable 'improvements' based strictly on the user's observed GitHub profile evidence.
+    - Title: Short uppercase action title (e.g. STRENGTHEN PROJECT DEPTH, IMPROVE PROJECT DOCUMENTATION, ADD AUTOMATED TESTING & CI, INCREASE OPEN-SOURCE COLLABORATION)
+    - Priority: HIGH, MEDIUM, or LOW
+    - Why: Concise explanation grounded in profile evidence
+    - Evidence: List of factual signals observed in the user's data
+    - Action: Concrete next step for the developer to strengthen verifiable proof
 
 Return exactly this JSON structure:
 {
@@ -53,6 +66,15 @@ Return exactly this JSON structure:
   ],
   "insights": [
     "Factual observation regarding language distribution, activity frequency, or public repositories"
+  ],
+  "improvements": [
+    {
+      "title": "STRENGTHEN PROJECT DEPTH",
+      "priority": "HIGH",
+      "why": "Your profile demonstrates broad technical exploration. A smaller number of deeper projects would make that expertise easier to verify.",
+      "evidence": ["20 public repositories", "broad technical footprint"],
+      "action": "Take 2-3 strongest projects to a complete production state with documentation, testing, and live deployment."
+    }
   ]
 }
 """
@@ -212,10 +234,57 @@ class GeminiClient:
             f"{evidence.recent_repository_count} repositories actively updated within the last 6 months."
         ]
 
+        improvements: list[ImprovementRecommendation] = [
+            ImprovementRecommendation(
+                title="STRENGTHEN PROJECT DEPTH",
+                priority="HIGH" if evidence.repository_count >= 10 else "MEDIUM",
+                why="Your profile demonstrates active technical breadth. Concentrating engineering depth on a smaller cohort of flagship projects provides stronger proof for reviewers.",
+                evidence=[
+                    f"{evidence.repository_count} public repositories",
+                    f"{evidence.active_repository_count} active in last 90 days"
+                ],
+                action="Choose your strongest 2–3 repositories and take them to a complete production state with architecture diagrams, setup instructions, automated tests, and live deployments."
+            ),
+            ImprovementRecommendation(
+                title="IMPROVE PROJECT DOCUMENTATION",
+                priority="HIGH",
+                why="Clear, professional technical documentation turns complex code into self-evident portfolio proof that recruiters and collaborators can quickly evaluate.",
+                evidence=[
+                    f"{len(evidence.languages)} programming ecosystems represented",
+                    "Repository documentation visibility signals"
+                ],
+                action="Add comprehensive READMEs, architectural overviews, setup commands, live demo links, and technical design decisions to your primary codebases."
+            ),
+            ImprovementRecommendation(
+                title="ADD TESTING & CI PIPELINES",
+                priority="MEDIUM",
+                why="Verifiable test suites and automated continuous integration pipelines provide concrete evidence of production software reliability and disciplined craftsmanship.",
+                evidence=[
+                    f"{evidence.repository_count} public repositories evaluated",
+                    "Automated test verification signals"
+                ],
+                action="Introduce unit and integration test suites along with GitHub Actions workflows to demonstrate disciplined test coverage and automated build validation."
+            ),
+            ImprovementRecommendation(
+                title="INCREASE OPEN-SOURCE COLLABORATION",
+                priority="MEDIUM" if evidence.total_forks == 0 else "LOW",
+                why="External collaboration signals, including pull request reviews, multi-author contributions, and active issue discussions, validate team engineering readiness.",
+                evidence=[
+                    f"{evidence.total_stars} stars earned across profile",
+                    f"{evidence.total_forks} forks tracked"
+                ] if (evidence.total_stars > 0 or evidence.total_forks > 0) else [
+                    f"{evidence.repository_count} personal repositories",
+                    "Single-contributor activity signals"
+                ],
+                action="Engage in community discussions, contribute pull requests to upstream open-source tooling, or invite peer code reviews on your public repositories."
+            )
+        ]
+
         return GeminiAnalysisResult(
             summary=summary,
             skills=skills,
             strengths=strengths,
             notable_projects=notable_projects,
-            insights=insights
+            insights=insights,
+            improvements=improvements
         )

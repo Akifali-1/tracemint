@@ -18,12 +18,24 @@ class NotableProject(BaseModel):
     reason: str = Field(..., description="Factual justification based on code, stars, topic, or complexity")
 
 
+class ImprovementRecommendation(BaseModel):
+    title: str = Field(..., description="Short uppercase recommendation title, e.g. STRENGTHEN PROJECT DEPTH")
+    priority: str = Field(..., description="Priority level: HIGH, MEDIUM, or LOW")
+    why: str = Field(..., description="Concise explanation grounded in profile evidence")
+    evidence: List[str] = Field(..., min_length=1, description="Underlying signals observed in user repositories")
+    action: str = Field(..., description="Concrete actionable next step")
+
+
 class GeminiAnalysisResult(BaseModel):
     summary: str = Field(..., description="Concise professional overview grounded purely in provided repository evidence")
     skills: List[SkillEvidence] = Field(default_factory=list, description="Demonstrated skills tied to repository evidence")
     strengths: List[StrengthEvidence] = Field(default_factory=list, description="Observed technical strengths with evidence")
     notable_projects: List[NotableProject] = Field(default_factory=list, description="Highlighted projects with objective reasons")
     insights: List[str] = Field(default_factory=list, description="Factual developer insights and patterns")
+    improvements: List[ImprovementRecommendation] = Field(
+        default_factory=list, 
+        description="Structured, evidence-grounded profile improvement recommendations"
+    )
 
 
 class DeterministicEvidence(BaseModel):
