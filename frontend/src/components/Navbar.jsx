@@ -14,6 +14,7 @@ export default function Navbar({
 
   const navItems = [
     { id: 'home', label: 'Home' },
+    ...(user ? [{ id: 'dashboard', label: 'Dashboard' }] : []),
     { id: 'how-it-works', label: 'How it works' },
     { id: 'about', label: 'About' },
   ];

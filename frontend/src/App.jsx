@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import AboutPage from './pages/AboutPage';
+import DashboardPage from './pages/DashboardPage';
 import DemoModal from './components/DemoModal';
 import ProfilePreviewCard from './components/ProfilePreviewCard';
 import { ArrowRight, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
@@ -12,7 +13,7 @@ import { api } from './services/api';
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-  const [demoModalTab, setDemoModalTab] = useState('live');
+  const [demoModalTab, setDemoModalTab] = useState('demo');
   const [user, setUser] = useState(null);
   const [authError, setAuthError] = useState('');
   const [publicProfile, setPublicProfile] = useState(null);
@@ -41,15 +42,15 @@ export default function App() {
 
     // Load authenticated user
     loadCurrentUser().then((loadedUser) => {
+      // If user just authenticated or connected GitHub, take them directly to the full dashboard!
       if (githubStatus === 'connected' || (authStatus === 'success' && loadedUser)) {
-        setDemoModalTab('live');
-        setIsDemoOpen(true);
+        setCurrentPage('dashboard');
       }
     });
 
     // Handle public handle route: e.g. /@akifali or /alexrivera
     const path = window.location.pathname.replace(/^\/+/, '');
-    if (path && !['how-it-works', 'about', ''].includes(path)) {
+    if (path && !['how-it-works', 'about', 'dashboard', ''].includes(path)) {
       const handleName = path.replace(/^@/, '');
       setLoadingPublicProfile(true);
       api.getPublicProfile(handleName)
@@ -101,11 +102,16 @@ export default function App() {
       await api.logout();
     } catch {}
     setUser(null);
+    setCurrentPage('home');
   };
 
   const handleOpenMyProfile = () => {
-    setDemoModalTab('live');
-    setIsDemoOpen(true);
+    if (user) {
+      setCurrentPage('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      handleOpenDemo('live');
+    }
   };
 
   return (
@@ -115,16 +121,18 @@ export default function App() {
       <aside aria-label="Announcement" className="bg-slate-950 text-white text-xs py-2 px-4 border-b border-slate-800 text-center font-mono">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
           <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded bg-sky-500/20 text-cyan-300 text-[10px] font-semibold border border-cyan-500/30">
-            OPEN SOURCE
+            PROOF ENGINE
           </span>
           <span className="text-slate-300">
-            TraceMint Proof Engine is live. Claim your verified developer dossier.
+            {user 
+              ? `Signed in as ${user.name}. View your verified analysis dossier.`
+              : 'TraceMint Proof Engine is live. Claim your verified developer dossier.'}
           </span>
           <button
-            onClick={() => handleOpenDemo(user ? 'live' : 'demo')}
+            onClick={user ? handleOpenMyProfile : () => handleOpenDemo('demo')}
             className="text-cyan-400 hover:text-cyan-300 underline font-semibold flex items-center gap-0.5 ml-1"
           >
-            <span>{user ? 'My Profile' : 'Try Demo'}</span>
+            <span>{user ? 'My Full Dashboard' : 'Try Demo'}</span>
             <ArrowRight className="w-3 h-3" />
           </button>
         </div>
@@ -164,6 +172,7 @@ export default function App() {
           </div>
         )}
 
+        {/* 1. Public Profile View */}
         {!loadingPublicProfile && currentPage === 'public-profile' && publicProfile && (
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
             <button
@@ -181,9 +190,19 @@ export default function App() {
           </div>
         )}
 
+        {/* 2. Full-Page Dashboard View */}
+        {!loadingPublicProfile && currentPage === 'dashboard' && user && (
+          <DashboardPage 
+            user={user}
+            onUserUpdated={loadCurrentUser}
+            onNavigateHome={() => setCurrentPage('home')}
+          />
+        )}
+
+        {/* 3. Landing Home View */}
         {!loadingPublicProfile && currentPage === 'home' && (
           <HomePage 
-            onOpenDemo={() => handleOpenDemo(user ? 'live' : 'demo')}
+            onOpenDemo={user ? handleOpenMyProfile : () => handleOpenDemo('demo')}
             onNavigateHowItWorks={() => {
               setCurrentPage('how-it-works');
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -191,20 +210,22 @@ export default function App() {
           />
         )}
 
+        {/* 4. How It Works View */}
         {!loadingPublicProfile && currentPage === 'how-it-works' && (
           <HowItWorksPage 
-            onOpenDemo={() => handleOpenDemo(user ? 'live' : 'demo')}
+            onOpenDemo={user ? handleOpenMyProfile : () => handleOpenDemo('demo')}
           />
         )}
 
+        {/* 5. Manifesto About View */}
         {!loadingPublicProfile && currentPage === 'about' && (
           <AboutPage 
-            onOpenDemo={() => handleOpenDemo(user ? 'live' : 'demo')}
+            onOpenDemo={user ? handleOpenMyProfile : () => handleOpenDemo('demo')}
           />
         )}
       </main>
 
-      {/* Interactive Demo / Real Profile Generation Modal */}
+      {/* Interactive Demo Simulation Modal for Visitors */}
       <DemoModal 
         isOpen={isDemoOpen}
         onClose={handleCloseDemo}
