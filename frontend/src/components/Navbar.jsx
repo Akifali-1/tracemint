@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Menu, X, ArrowUpRight, Terminal } from 'lucide-react';
 
-export default function Navbar({ currentPage, setCurrentPage, onOpenDemo }) {
+export default function Navbar({ 
+  currentPage, 
+  setCurrentPage, 
+  onOpenDemo, 
+  user, 
+  onLogin, 
+  onLogout, 
+  onOpenMyProfile 
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -65,18 +73,44 @@ export default function Navbar({ currentPage, setCurrentPage, onOpenDemo }) {
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={onOpenDemo}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all shadow-subtle group"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all shadow-subtle group"
             >
               <Terminal className="w-4 h-4 text-sky-600 group-hover:rotate-12 transition-transform" />
               <span>View Demo</span>
             </button>
-            <button
-              onClick={onOpenDemo}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-950 rounded-lg hover:bg-slate-800 active:scale-[0.98] transition-all shadow-sm"
-            >
-              <span>Create Profile</span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-cyan-300" />
-            </button>
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onOpenMyProfile}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-900 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition-all"
+                >
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-bold">
+                      {user.name?.[0] || 'U'}
+                    </span>
+                  )}
+                  <span>{user.name?.split(' ')[0] || 'Profile'}</span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="px-2.5 py-2 text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition-colors"
+                  title="Sign out"
+                >
+                  Log out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onLogin}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-950 rounded-lg hover:bg-slate-800 active:scale-[0.98] transition-all shadow-sm"
+              >
+                <span>Continue with Google</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-cyan-300" />
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -118,15 +152,38 @@ export default function Navbar({ currentPage, setCurrentPage, onOpenDemo }) {
             );
           })}
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenDemo();
-              }}
-              className="w-full py-2.5 px-4 text-center text-sm font-semibold text-white bg-slate-950 rounded-lg shadow-sm"
-            >
-              Create your profile
-            </button>
+            {user ? (
+              <>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenMyProfile();
+                  }}
+                  className="w-full py-2.5 px-4 text-center text-sm font-semibold text-slate-900 bg-sky-50 border border-sky-200 rounded-lg shadow-sm"
+                >
+                  My Profile ({user.name?.split(' ')[0]})
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="w-full py-2 px-4 text-center text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg border border-slate-200"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onLogin();
+                }}
+                className="w-full py-2.5 px-4 text-center text-sm font-semibold text-white bg-slate-950 rounded-lg shadow-sm"
+              >
+                Continue with Google
+              </button>
+            )}
           </div>
         </div>
       )}

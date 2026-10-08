@@ -81,7 +81,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Zero manual resume updates
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-sky-600" /> Cryptographic commit verification
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-600" /> Deterministic GitHub evidence
             </span>
             <span className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-500" /> Syncs in &lt; 30 seconds
@@ -93,8 +93,8 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
         <div className="mt-10 sm:mt-16 max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 mb-3">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="text-[11px] sm:text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                Preview:
+              <span className="px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-mono font-semibold">
+                Sample profile — demonstration data
               </span>
               <button 
                 onClick={() => setPreviewProfileIdx(0)}
