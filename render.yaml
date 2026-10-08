@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: tracemint-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tracemint-db
+          property: connectionString
+      - key: BACKEND_URL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://tracemint.tech
+      - key: CORS_ORIGINS
+        value: https://tracemint.tech,https://www.tracemint.tech,https://tracemint-sable.vercel.app,http://localhost:5173
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+
+databases:
+  - name: tracemint-db
+    plan: free
+    region: oregon
+    databaseName: tracemint
+    user: tracemint_user
