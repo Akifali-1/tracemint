@@ -4,7 +4,6 @@ import {
   ShieldCheck, 
   GitBranch, 
   Terminal, 
-  Sparkles, 
   CheckCircle2, 
   Code2, 
   Zap, 
@@ -91,16 +90,16 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
         </div>
 
         {/* HERO DASHBOARD / PROFILE PREVIEW */}
-        <div className="mt-12 sm:mt-16 max-w-5xl mx-auto">
-          <div className="flex items-center justify-between px-2 mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                Interactive Profile Preview:
+        <div className="mt-10 sm:mt-16 max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 mb-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="text-[11px] sm:text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
+                Preview:
               </span>
               <button 
                 onClick={() => setPreviewProfileIdx(0)}
                 className={`text-xs px-2.5 py-1 rounded-md font-mono transition-all ${
-                  previewProfileIdx === 0 ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300'
+                  previewProfileIdx === 0 ? 'bg-slate-900 text-white font-semibold shadow-sm' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300'
                 }`}
               >
                 Alex (Full-Stack)
@@ -108,7 +107,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
               <button 
                 onClick={() => setPreviewProfileIdx(1)}
                 className={`text-xs px-2.5 py-1 rounded-md font-mono transition-all ${
-                  previewProfileIdx === 1 ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300'
+                  previewProfileIdx === 1 ? 'bg-slate-900 text-white font-semibold shadow-sm' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300'
                 }`}
               >
                 Elena (Systems / Rust)
@@ -116,7 +115,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
             </div>
             <button
               onClick={onOpenDemo}
-              className="text-xs font-mono font-semibold text-sky-700 hover:text-sky-800 flex items-center gap-1"
+              className="text-xs font-mono font-semibold text-sky-700 hover:text-sky-800 flex items-center gap-1 self-start sm:self-auto"
             >
               <span>Test Live Simulator</span>
               <ExternalLink className="w-3 h-3" />
@@ -287,8 +286,12 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
           </p>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-card">
-          <table className="w-full text-left border-collapse text-xs sm:text-sm">
+        <div className="sm:hidden text-center text-[11px] text-slate-400 font-mono mb-2">
+          ← Swipe table horizontally to compare →
+        </div>
+
+        <div className="overflow-x-auto no-scrollbar bg-white rounded-2xl border border-slate-200 shadow-card">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm min-w-[520px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-mono text-[11px]">
                 <th className="py-3.5 px-4 sm:px-6 font-semibold">Capability</th>
@@ -337,7 +340,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="bg-gradient-to-b from-slate-900 to-slate-950 text-white rounded-3xl p-8 sm:p-14 border border-slate-800 shadow-2xl space-y-6">
           <div className="inline-flex p-3 rounded-2xl bg-slate-800/80 text-cyan-400 mb-1 border border-slate-700">
-            <Sparkles className="w-6 h-6" />
+            <ShieldCheck className="w-6 h-6" />
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
@@ -351,7 +354,7 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
 
           <form onSubmit={handleClaim} className="max-w-md mx-auto flex flex-col sm:flex-row gap-2 pt-2">
             <div className="relative flex-1">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-xs text-slate-500">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-xs text-slate-400 pointer-events-none">
                 tracemint.tech/
               </span>
               <input
@@ -359,12 +362,12 @@ export default function HomePage({ onOpenDemo, onNavigateHowItWorks }) {
                 placeholder="yourhandle"
                 value={handleInput}
                 onChange={(e) => setHandleInput(e.target.value)}
-                className="w-full pl-32 pr-3 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full pl-32 pr-3 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-slate-500"
               />
             </div>
             <button
               type="submit"
-              className="px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-sm hover:bg-slate-100 transition-colors shadow-sm"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-sm hover:bg-slate-100 transition-colors shadow-sm shrink-0"
             >
               Claim Handle
             </button>

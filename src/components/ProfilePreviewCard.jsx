@@ -8,7 +8,7 @@ import {
   Server, 
   Flame, 
   Layers, 
-  Sparkles, 
+  Tag, 
   CheckCircle2, 
   Clock, 
   Star,
@@ -31,69 +31,69 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
   return (
     <div className="w-full bg-white rounded-2xl border border-slate-200/90 shadow-card overflow-hidden transition-all duration-300 hover:shadow-float">
       {/* Top status bar simulating developer profile header */}
-      <div className="bg-slate-900 text-slate-100 px-4 sm:px-6 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2 font-mono">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-slate-300">tracemint.tech/</span>
+      <div className="bg-slate-900 text-slate-100 px-3.5 sm:px-6 py-2.5 sm:py-3 border-b border-slate-800 flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5 sm:gap-2 font-mono min-w-0">
+          <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <span className="text-slate-300 truncate text-[11px] sm:text-xs">
+            <span className="hidden xs:inline text-slate-400">tracemint.tech/</span>
             <span className="text-cyan-400 font-semibold">{profile.handle}</span>
-          </div>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] border border-slate-700">
+          </span>
+          <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] border border-slate-700 shrink-0">
             PROVEN BUILDER
           </span>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-slate-400 font-mono text-[11px]">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-1 text-slate-400 font-mono text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
             <span>ZKP Cryptographically Signed</span>
           </div>
           <button 
             onClick={handleCopyLink}
-            className="flex items-center gap-1 text-slate-300 hover:text-white px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-1 text-slate-300 hover:text-white px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-800 transition-colors text-[11px] font-mono"
             title="Copy Proof URL"
           >
             {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-            <span className="text-[11px] font-mono">{copied ? 'Copied' : 'Share'}</span>
+            <span>{copied ? 'Copied' : 'Share'}</span>
           </button>
         </div>
       </div>
 
       {/* Profile Bio & Proof Score Banner */}
-      <div className="p-5 sm:p-7 border-b border-slate-100 bg-gradient-to-b from-slate-50/60 to-white">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-          <div className="flex items-start sm:items-center gap-4">
-            <div className="relative">
+      <div className="p-4 sm:p-7 border-b border-slate-100 bg-gradient-to-b from-slate-50/60 to-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5">
+          <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
+            <div className="relative shrink-0">
               <img 
                 src={profile.avatar} 
                 alt={profile.name} 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-slate-200"
+                className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-slate-200"
               />
-              <div className="absolute -bottom-1 -right-1 bg-sky-600 text-white p-1 rounded-full shadow" title="Verified by TraceMint Engine">
-                <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="absolute -bottom-1 -right-1 bg-sky-600 text-white p-0.5 sm:p-1 rounded-full shadow" title="Verified by TraceMint Engine">
+                <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{profile.name}</h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h3 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">{profile.name}</h3>
+                <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                   Verified Work
                 </span>
               </div>
-              <p className="text-sm text-slate-600 font-medium">{profile.role}</p>
-              <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 font-mono">
+              <p className="text-xs sm:text-sm text-slate-600 font-medium">{profile.role}</p>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-[11px] sm:text-xs text-slate-500 font-mono">
                 <span>📍 {profile.location}</span>
-                <span>•</span>
+                <span className="hidden xs:inline">•</span>
                 <span className="text-sky-700 font-medium">14 Verified Repos</span>
               </div>
             </div>
           </div>
 
           {/* Proof Score Card */}
-          <div className="w-full sm:w-auto bg-slate-900 text-white rounded-xl p-3.5 sm:px-5 sm:py-3.5 border border-slate-800 shadow-sm flex items-center justify-between sm:justify-start gap-4">
+          <div className="w-full sm:w-auto bg-slate-900 text-white rounded-xl p-3 sm:px-5 sm:py-3.5 border border-slate-800 shadow-sm flex items-center justify-between sm:justify-start gap-4">
             <div>
-              <div className="text-[10px] uppercase font-mono tracking-wider text-slate-400">Proof Score</div>
+              <div className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-slate-400">Proof Score</div>
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">{profile.proofScore}</span>
                 <span className="text-xs text-cyan-400 font-mono font-medium">/ 100</span>
@@ -101,43 +101,43 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
             </div>
             <div className="h-9 w-[1px] bg-slate-800"></div>
             <div className="text-right sm:text-left">
-              <div className="text-[10px] uppercase font-mono tracking-wider text-slate-400">Percentile</div>
-              <div className="text-sm font-semibold text-emerald-400 font-mono">{profile.percentile}</div>
-              <div className="text-[10px] text-slate-400">Ship Velocity</div>
+              <div className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-slate-400">Percentile</div>
+              <div className="text-xs sm:text-sm font-semibold text-emerald-400 font-mono">{profile.percentile}</div>
+              <div className="text-[9px] sm:text-[10px] text-slate-400">Ship Velocity</div>
             </div>
           </div>
         </div>
 
         {/* Micro Metric Badges */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mt-6">
-          <div className="bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
-            <div className="text-[11px] text-slate-500 font-mono">Verified Commits</div>
-            <div className="text-base font-bold text-slate-900 font-mono">{profile.stats.commits}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mt-4 sm:mt-6">
+          <div className="bg-slate-50/80 p-2 sm:p-2.5 rounded-lg border border-slate-200/70">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono">Verified Commits</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 font-mono">{profile.stats.commits}</div>
           </div>
-          <div className="bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
-            <div className="text-[11px] text-slate-500 font-mono">PRs Merged</div>
-            <div className="text-base font-bold text-slate-900 font-mono">{profile.stats.prMerged}</div>
+          <div className="bg-slate-50/80 p-2 sm:p-2.5 rounded-lg border border-slate-200/70">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono">PRs Merged</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 font-mono">{profile.stats.prMerged}</div>
           </div>
-          <div className="bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
-            <div className="text-[11px] text-slate-500 font-mono">Projects Shipped</div>
-            <div className="text-base font-bold text-slate-900 font-mono">{profile.stats.projectsShipped}</div>
+          <div className="bg-slate-50/80 p-2 sm:p-2.5 rounded-lg border border-slate-200/70">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono">Projects Shipped</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 font-mono">{profile.stats.projectsShipped}</div>
           </div>
-          <div className="bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
-            <div className="text-[11px] text-slate-500 font-mono">Deployments</div>
-            <div className="text-base font-bold text-slate-900 font-mono">{profile.stats.deployments}</div>
+          <div className="bg-slate-50/80 p-2 sm:p-2.5 rounded-lg border border-slate-200/70">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono">Deployments</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 font-mono">{profile.stats.deployments}</div>
           </div>
-          <div className="col-span-2 sm:col-span-1 bg-sky-50/70 p-2.5 rounded-lg border border-sky-100">
-            <div className="text-[11px] text-sky-800 font-mono flex items-center gap-1">
+          <div className="col-span-2 sm:col-span-1 bg-sky-50/70 p-2 sm:p-2.5 rounded-lg border border-sky-100">
+            <div className="text-[10px] sm:text-[11px] text-sky-800 font-mono flex items-center gap-1">
               <Trophy className="w-3 h-3 text-amber-500" />
               <span>Hackathons</span>
             </div>
-            <div className="text-base font-bold text-sky-950 font-mono">{profile.stats.hackathonWins} Podiums</div>
+            <div className="text-sm sm:text-base font-bold text-sky-950 font-mono">{profile.stats.hackathonWins} Podiums</div>
           </div>
         </div>
       </div>
 
       {/* Tabs navigation */}
-      <div className="flex border-b border-slate-200 bg-slate-50/40 px-4 sm:px-6 overflow-x-auto text-xs font-medium">
+      <div className="flex border-b border-slate-200 bg-slate-50/40 px-2 sm:px-6 overflow-x-auto no-scrollbar text-xs font-medium">
         <button
           onClick={() => setActiveTab('overview')}
           className={`py-3 px-3 border-b-2 font-medium transition-colors whitespace-nowrap ${
@@ -277,7 +277,7 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
                         {act.type === 'pr_merge' && <GitBranch className="w-3.5 h-3.5 text-purple-600" />}
                         {act.type === 'deploy' && <Server className="w-3.5 h-3.5 text-emerald-600" />}
                         {act.type === 'hackathon' && <Trophy className="w-3.5 h-3.5 text-amber-500" />}
-                        {act.type === 'release' && <Sparkles className="w-3.5 h-3.5 text-sky-600" />}
+                        {act.type === 'release' && <Tag className="w-3.5 h-3.5 text-sky-600" />}
                       </div>
                       <div>
                         <div className="font-medium text-slate-900">{act.text}</div>
@@ -389,12 +389,12 @@ export default function ProfilePreviewCard({ profileIndex = 0 }) {
       </div>
 
       {/* Footer proof card bar */}
-      <div className="bg-slate-50 px-5 py-3 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
+      <div className="bg-slate-50 px-4 sm:px-5 py-3 border-t border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-0 text-xs text-slate-500">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Immutable Trace Hash: <span className="font-mono text-slate-800 font-semibold">0x9c3f...d82a</span></span>
+          <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+          <span className="text-[11px] sm:text-xs">Immutable Trace Hash: <span className="font-mono text-slate-800 font-semibold">0x9c3f...d82a</span></span>
         </div>
-        <span className="font-mono text-[11px] text-slate-400">Audited 12m ago</span>
+        <span className="font-mono text-[10px] sm:text-[11px] text-slate-400">Audited 12m ago</span>
       </div>
     </div>
   );

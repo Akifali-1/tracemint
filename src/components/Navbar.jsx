@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Menu, X, ArrowUpRight, Terminal, Sparkles } from 'lucide-react';
+import { ShieldCheck, Menu, X, ArrowUpRight, Terminal } from 'lucide-react';
 
 export default function Navbar({ currentPage, setCurrentPage, onOpenDemo }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

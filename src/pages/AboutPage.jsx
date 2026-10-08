@@ -4,7 +4,6 @@ import {
   Terminal, 
   Hammer, 
   Eye, 
-  Sparkles, 
   ArrowRight, 
   Layers, 
   Check, 
@@ -35,27 +34,27 @@ export default function AboutPage({ onOpenDemo }) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-20 space-y-12 sm:space-y-16">
       
       {/* Manifesto Header */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-mono font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
           <span>The TraceMint Manifesto</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-tight">
+        <h1 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-tight">
           “Resumes describe what you say you can do. <br className="hidden sm:inline" />
           <span className="text-sky-700">TraceMint shows what you actually built.”</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+        <p className="text-sm sm:text-lg text-slate-600 leading-relaxed">
           The technology hiring market is fundamentally broken. Hundreds of applicants submit identical, keyword-optimized PDF resumes for single positions. Engineering leaders waste weeks conducting whiteboard syntax trivia, while brilliant builders who ship real production software get overlooked.
         </p>
       </div>
 
       {/* Philosophy Statement */}
-      <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6 shadow-xl relative overflow-hidden">
+      <div className="bg-slate-900 text-white rounded-3xl p-5 sm:p-12 border border-slate-800 space-y-5 sm:space-y-6 shadow-xl relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-60 h-60 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div className="space-y-4 max-w-2xl">

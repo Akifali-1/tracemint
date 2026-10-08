@@ -62,3 +62,14 @@
 .animate-pulse-subtle {
   animation: pulseSubtle 4s ease-in-out infinite;
 }
+
+/* Hide scrollbar for clean horizontal swipes on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ArrowRight, Sparkles, Terminal, ShieldCheck, Loader2 } from 'lucide-react';
+import { X, CheckCircle2, ArrowRight, Terminal, ShieldCheck, Loader2 } from 'lucide-react';
 import { GithubIcon } from './Icons';
 import { sampleProfiles } from '../data/mockData';
 import ProfilePreviewCard from './ProfilePreviewCard';
@@ -29,20 +29,20 @@ export default function DemoModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5 overflow-y-auto bg-slate-950/60 backdrop-blur-sm animate-fade-in">
       <div 
-        className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[94vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-cyan-400 font-mono font-bold flex items-center justify-center text-sm">
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 text-cyan-400 font-mono font-bold flex items-center justify-center text-xs sm:text-sm shrink-0">
               ₮
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">TraceMint Profile Simulator</h3>
-              <p className="text-xs text-slate-500">Live test: generate your verified proof of work dossier</p>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">TraceMint Profile Simulator</h3>
+              <p className="text-[11px] sm:text-xs text-slate-500">Live test: generate your verified proof of work dossier</p>
             </div>
           </div>
           <button
@@ -54,7 +54,7 @@ export default function DemoModal({ isOpen, onClose }) {
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-6">
+        <div className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
           {/* Quick preset switch */}
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
             <div className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 font-mono">
@@ -110,7 +110,7 @@ export default function DemoModal({ isOpen, onClose }) {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <ShieldCheck className="w-4 h-4 text-cyan-400" />
                   <span>Generate Proof Dossier</span>
                 </>
               )}
