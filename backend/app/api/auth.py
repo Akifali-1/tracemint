@@ -25,20 +25,6 @@ async def google_login(
     redirect_url: Optional[str] = None
 ):
     """Redirects user to Google OAuth 2.0 authorization endpoint with CSRF state protection."""
-    state = secrets.token_urlsafe(32)
-    auth_url = get_google_auth_url(state)
-
-    redirect = RedirectResponse(url=auth_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
-    # Store state in cookie for callback verification
-    redirect.set_cookie(
-        key="oauth_state_google",
-        value=state,
-        httponly=True,
-        secure=settings.is_production,
-        samesite="lax",
-        max_age=600  # 10 minutes
-    )
-
     # Determine caller's intended frontend origin
     target_origin = None
     candidate = redirect_url or request.headers.get("referer") or request.headers.get("origin")
@@ -53,15 +39,33 @@ async def google_login(
         except Exception:
             pass
 
-    if target_origin:
-        redirect.set_cookie(
-            key="oauth_frontend_origin",
-            value=target_origin,
-            httponly=True,
-            secure=settings.is_production,
-            samesite="lax",
-            max_age=600
-        )
+    if not target_origin:
+        target_origin = settings.effective_frontend_url.rstrip('/')
+
+    csrf_token = secrets.token_urlsafe(32)
+    import base64
+    origin_b64 = base64.urlsafe_b64encode(target_origin.encode("utf-8")).decode("utf-8")
+    composite_state = f"{csrf_token}.{origin_b64}"
+    auth_url = get_google_auth_url(composite_state)
+
+    redirect = RedirectResponse(url=auth_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    # Store state in cookie for callback verification
+    redirect.set_cookie(
+        key="oauth_state_google",
+        value=csrf_token,
+        httponly=True,
+        secure=settings.is_production,
+        samesite="lax",
+        max_age=600  # 10 minutes
+    )
+    redirect.set_cookie(
+        key="oauth_frontend_origin",
+        value=target_origin,
+        httponly=True,
+        secure=settings.is_production,
+        samesite="lax",
+        max_age=600
+    )
     return redirect
 
 
@@ -74,12 +78,27 @@ async def google_callback(
     db: AsyncSession = Depends(get_db)
 ):
     """Handles Google OAuth authorization response, creates or updates user, and establishes session."""
-    stored_frontend = request.cookies.get("oauth_frontend_origin")
+    extracted_origin = None
+    state_csrf = state or ""
+    if state and "." in state:
+        parts = state.split(".", 1)
+        state_csrf = parts[0]
+        try:
+            import base64
+            decoded = base64.urlsafe_b64decode(parts[1].encode("utf-8")).decode("utf-8").rstrip('/')
+            allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+            if decoded in allowed:
+                extracted_origin = decoded
+        except Exception:
+            pass
+
+    stored_frontend = (request.cookies.get("oauth_frontend_origin") or "").strip('\'"').rstrip('/')
     frontend_base = settings.effective_frontend_url.rstrip('/')
-    if stored_frontend:
-        allowed = [o.rstrip('/') for o in settings.cors_origin_list]
-        if stored_frontend in allowed:
-            frontend_base = stored_frontend
+    allowed = [o.rstrip('/') for o in settings.cors_origin_list]
+    if extracted_origin and extracted_origin in allowed:
+        frontend_base = extracted_origin
+    elif stored_frontend and stored_frontend in allowed:
+        frontend_base = stored_frontend
 
     def _cleanup_redirect(url: str, status_code: int = status.HTTP_302_FOUND) -> RedirectResponse:
         r = RedirectResponse(url=url, status_code=status_code)
@@ -91,10 +110,14 @@ async def google_callback(
         logger.warning(f"Google OAuth callback received error: {error}")
         return _cleanup_redirect(f"{frontend_base}/?error=google_oauth_denied")
 
-    # Validate state
+    # Validate state CSRF
     stored_state = request.cookies.get("oauth_state_google")
-    if not stored_state or stored_state != state:
-        logger.warning("Google OAuth state mismatch or expired")
+    if stored_state:
+        if stored_state != state_csrf and stored_state != state:
+            logger.warning("Google OAuth state mismatch")
+            return _cleanup_redirect(f"{frontend_base}/?error=invalid_oauth_state")
+    elif not state_csrf or len(state_csrf) < 16:
+        logger.warning("Google OAuth state missing or invalid")
         return _cleanup_redirect(f"{frontend_base}/?error=invalid_oauth_state")
 
     # Exchange code for user identity

@@ -9,7 +9,7 @@ GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 
 def get_github_auth_url(state: str) -> str:
     """Builds GitHub OAuth authorization URL requesting minimal read-only public repository access."""
-    redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/api/github/callback"
+    redirect_uri = f"{settings.clean_backend_url}/api/github/callback"
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
         "redirect_uri": redirect_uri,
@@ -24,7 +24,7 @@ def get_github_auth_url(state: str) -> str:
 
 async def exchange_github_code(code: str) -> Optional[str]:
     """Exchanges GitHub authorization code for user access token."""
-    redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/api/github/callback"
+    redirect_uri = f"{settings.clean_backend_url}/api/github/callback"
     
     async with httpx.AsyncClient(timeout=15.0) as client:
         data = {

@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     )
 
     @property
+    def clean_backend_url(self) -> str:
+        return (self.BACKEND_URL or "").strip().rstrip("/")
+
+    @property
+    def clean_frontend_url(self) -> str:
+        return (self.FRONTEND_URL or "").strip().rstrip("/")
+
+    @property
     def effective_frontend_url(self) -> str:
         """
         Determines the default frontend base URL.
@@ -42,10 +50,10 @@ class Settings(BaseSettings):
         If running in cloud/production or on Render, fallback to https://tracemint.tech.
         Otherwise defaults to http://localhost:5173.
         """
-        configured = (self.FRONTEND_URL or "").rstrip("/")
+        configured = self.clean_frontend_url
         if configured and "localhost" not in configured and "127.0.0.1" not in configured:
             return configured
-        if os.getenv("RENDER") or self.is_production or "onrender.com" in self.BACKEND_URL:
+        if os.getenv("RENDER") or self.is_production or "onrender.com" in self.clean_backend_url:
             return "https://tracemint.tech"
         return configured or "http://localhost:5173"
 

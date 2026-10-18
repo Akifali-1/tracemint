@@ -11,7 +11,7 @@ GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 def get_google_auth_url(state: str) -> str:
     """Builds the Google OAuth 2.0 authorization URL requesting openid, email, profile."""
-    redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/api/auth/google/callback"
+    redirect_uri = f"{settings.clean_backend_url}/api/auth/google/callback"
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
@@ -28,7 +28,7 @@ def get_google_auth_url(state: str) -> str:
 
 async def exchange_google_code(code: str) -> Optional[Dict[str, Any]]:
     """Exchanges Google authorization code for tokens and retrieves user identity profile."""
-    redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/api/auth/google/callback"
+    redirect_uri = f"{settings.clean_backend_url}/api/auth/google/callback"
     
     async with httpx.AsyncClient(timeout=15.0) as client:
         # 1. Exchange authorization code for access token

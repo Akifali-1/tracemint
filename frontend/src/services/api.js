@@ -1,7 +1,21 @@
 // TraceMint API Client
 // Connects the React frontend to the FastAPI backend service
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+function getApiBase() {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+  // Fallback for deployed frontend: if VITE_API_URL was not set in Vercel project settings,
+  // point to the live Render API backend instead of failing with localhost:8000.
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://tracemint-api.onrender.com';
+    }
+  }
+  return 'http://localhost:8000';
+}
 
 function getAuthHeader() {
   const token = localStorage.getItem('tracemint_session_token');
@@ -9,7 +23,7 @@ function getAuthHeader() {
 }
 
 async function request(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
+  const url = `${getApiBase()}${endpoint}`;
   const defaultHeaders = {
     'Content-Type': 'application/json',
     ...getAuthHeader(),
@@ -43,12 +57,12 @@ export const api = {
   getGoogleLoginUrl: () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const query = origin ? `?redirect_url=${encodeURIComponent(origin)}` : '';
-    return `${API_BASE}/api/auth/google/login${query}`;
+    return `${getApiBase()}/api/auth/google/login${query}`;
   },
   getGitHubConnectUrl: () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const query = origin ? `?redirect_url=${encodeURIComponent(origin)}` : '';
-    return `${API_BASE}/api/github/connect${query}`;
+    return `${getApiBase()}/api/github/connect${query}`;
   },
 
   // Authentication
